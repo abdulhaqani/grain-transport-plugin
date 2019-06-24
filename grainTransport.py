@@ -71,7 +71,7 @@ class Data:
             self.csvFile = False
             print("File path does not exist")
             return
-        csvFile = dbf_to_csv(file)
+        self.csvFile = dbf_to_csv(file)
         # read in the dbf
         # convert it to a df
 
@@ -866,7 +866,8 @@ class grainTransport:
                 #        for j in range(rand):                                           # for each train on the line
                 #            randMaxCar = random.randint(0,10)
                 #            randCar = random.randint(0, randMaxCar)
-                #            train = Train(randMaxCar)                            # create a train with a max number of cars
+                #            train = Train(randMaxCar)                            # create a train with a max number of
+                #            cars
                 #            for k in range(randCar):                                    # for each car on the train
                 #                #carEnum = random.randint(1,2)
                 #                carEnum = CarEnumerator.PRODUCECAR
@@ -879,7 +880,8 @@ class grainTransport:
                 #                    carSizeEnum = CarSizeEnumerator.LARGE
                 #                else:
                 #                    carSizeEnum = CarSizeEnumerator.EXTRALARGE
-                #                car = ProduceCar(carEnum, carSizeEnum, 1, 1)        # create the car, assume 1 load and 1 unload
+                #                car = ProduceCar(carEnum, carSizeEnum, 1, 1)        # create the car, assume 1 load and
+                #                1 unload
                 #                car.loadCar(car.numLoadStops)
                 #                car.unLoadCar(car.numUnLoadStops)
                 #
