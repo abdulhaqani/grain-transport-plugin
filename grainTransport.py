@@ -573,10 +573,10 @@ def weightedShortestPath(railGraph, initial, end):
     shortest_paths = {initial: (None, 0)}
     current_node = initial
     visited = set()
-    if (railGraph.edges[initial] == null):
+    if (railGraph.edges[initial] == None):
         print("initial node does not exist")
         return
-    elif (railGraph.edges[end] == null):
+    elif (railGraph.edges[end] == None):
         print("end node does not exist")
         return
     while current_node != end:
