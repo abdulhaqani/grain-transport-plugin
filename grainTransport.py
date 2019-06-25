@@ -779,7 +779,157 @@ class grainTransport:
                 action)
             self.iface.removeToolBarIcon(action)
 
+	def pathTest():
+		qid = QInputDialog()
 
+		"""running everything """
+		railGraph = Graph()
+		input, ok = QInputDialog.getText(qid, "Enter inputs", "Enter inputs as 'fileName,start,end'",
+										 QLineEdit.Normal,
+										 "FILEPATH" + "," + "FromTrackID" + "," + "ToTrackId")
+		x = ""
+		y = ""
+		z = ""
+		if ok:
+			x = input.split(",")[0]
+			if x == "FILEPATH":
+				print("Enter valid inputs")
+				return
+			print(x)
+			try:
+				y = input.split(",")[1]
+				if y == "FromTrackID":
+					print("Enter valid inputs")
+					return
+				print(y)
+			except:
+				print("Input start junction after comma")
+			try:
+				z = input.split(",")[2]
+				if z == "ToTrackID":
+					print("Enter valid inputs")
+					return
+				print(z)
+			except:
+				print("Input end junction after comma")
+			if not x:
+				print("Ooops! FileName value is missing!")
+				return
+			if not y:
+				print("Ooops! From Junction value is missing!")
+				return
+			if not z:
+				print("Ooops! To Junction value is missing!")
+				return
+			file = x
+			start = y
+			end = z
+		else:
+			print("Cancelled")
+			return
+
+		data = Data(file)
+		if data.csvFile == False:
+			return
+		edges = defaultdict(list)
+		# create the graph
+		for i in range(len(data.df)):  # for each line
+			rand = random.randint(0, 5)  # generate a random number of trains on the line
+			trackEdge = TrackEdge(float(data.lengthDf.iloc[i]), float(data.speed.iloc[i]), 1)
+			railGraph.add_edge(data.fromTrackNIDDf.iloc[i], data.toTrackNIDDf.iloc[i], trackEdge)
+
+		#    The following commented code was used for testing how the addition of cars
+		#    and trains impact the time, and it worked as intended. it randomly populated
+		#    the lines with cars This works when running program in an external python
+		#    console, however, when running on qgis python console it causes qgis to
+		#    freeze because there are too many calculations for this underpowered python
+		#    console. In order to run the commented code below, a stronger computer or
+		#    network of computers is required.
+
+		#        for j in range(rand):                                           # for each train on the line
+		#            randMaxCar = random.randint(0,10)
+		#            randCar = random.randint(0, randMaxCar)
+		#            train = Train(randMaxCar)                            # create a train with a max number of
+		#            cars
+		#            for k in range(randCar):                                    # for each car on the train
+		#                #carEnum = random.randint(1,2)
+		#                carEnum = CarEnumerator.PRODUCECAR
+		#                carSize = random.randint(1, 4)
+		#                if carSize == 1:
+		#                    carSizeEnum = CarSizeEnumerator.SMALL
+		#                elif carSize == 2:
+		#                    carSizeEnum = CarSizeEnumerator.MEDIUM
+		#                elif carSize == 3:
+		#                    carSizeEnum = CarSizeEnumerator.LARGE
+		#                else:
+		#                    carSizeEnum = CarSizeEnumerator.EXTRALARGE
+		#                car = ProduceCar(carEnum, carSizeEnum, 1, 1)        # create the car, assume 1 load and
+		#                1 unload
+		#                car.loadCar(car.numLoadStops)
+		#                car.unLoadCar(car.numUnLoadStops)
+		#
+		#                train.addCar(car)                                       # add to the train
+		#            train.loadTrain()
+		#            trackEdge.addTrain(train)                                   # add the train to the tracks
+
+		# append the line with the trains with the cars onto the graph
+
+		# Need to filter out the graph from/to nodes
+		a = weightedShortestPath(railGraph, start, end)
+		path = a[0]
+		time = a[1]
+		if trackEdge.currentTrains.head.dataval is not None:
+			stopTime = trackEdge.currentTrains.head.dataval.getStopTime()
+			print("Total stop time for the trip is: " + stopTime.__str__() + " hours \n")
+		return path
+
+    def test():
+		   layer = QgsProject.instance().mapLayersByName('JJunctTrack50BFinal')[0]
+		   layer2 = QgsProject.instance().mapLayersByName('MBTrackLines')[0]
+		   path = pathTest()
+		   if not path:
+			   print("NO PATH POSSIBLE")
+			   return
+		   x = []
+		   y = []
+
+		# The following commented code is for the directions of the junctions with the
+		# same IDs, however on the map with this code many of the selected nodes are
+		# hidden by overlapping nodes, therefore, even though it is more correct, for
+		# the purposes of viewing on QGIS, The code block was replaced with one that
+		# selects the overlapping junctions which accounts for the different directions.
+		# The highlighted lines have no effect however, it is only the nodes
+
+		#    for i in range(len(path) - 1):
+		#        j = path[i]
+		#        k = path[i+1]
+		#        layer.selectByExpression('\"FTrackNID\" IS\'%s\' AND\"TOTrackNID\" IS\'%s\'' %(j, k))
+		#        for l in layer.selectedFeatureIds():
+		#            x.append(l)
+		#    layer.selectByExpression('\"FTrackNID\" IS\'%s\'' %(path[len(path)-1]))
+		#    for l in layer.selectedFeatureIds():
+		#        x.append(l)
+		#    for i in range(len(path)):
+		#        j = path[i]
+		#        layer2.selectByExpression('\"NID\" IS\'%s\'' %j)
+		#        for l in layer2.selectedFeatureIds():
+		#            y.append(l)
+
+		if not path:
+			return
+		for i in range(len(path)):
+			j = path[i]
+			layer.selectByExpression('\"FTrackNID\" IS\'%s\'' % j)
+			for l in layer.selectedFeatureIds():
+				x.append(l)
+			layer2.selectByExpression('\"NID\" IS\'%s\'' % j)
+			for l in layer2.selectedFeatureIds():
+				y.append(l)
+
+		layer.select(x)
+		layer2.select(y)
+			
+			
     def run(self):
         """Run method that performs all the real work"""
 
@@ -795,158 +945,9 @@ class grainTransport:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
-            qid = QInputDialog()
-
-            """running everything """
-            railGraph = Graph()
-
-            def pathTest():
-                input, ok = QInputDialog.getText(qid, "Enter inputs", "Enter inputs as 'fileName,start,end'",
-                                                 QLineEdit.Normal,
-                                                 "FILEPATH" + "," + "FromTrackID" + "," + "ToTrackId")
-                x = ""
-                y = ""
-                z = ""
-                if ok:
-                    x = input.split(",")[0]
-                    if x == "FILEPATH":
-                        print("Enter valid inputs")
-                        return
-                    print(x)
-                    try:
-                        y = input.split(",")[1]
-                        if y == "FromTrackID":
-                            print("Enter valid inputs")
-                            return
-                        print(y)
-                    except:
-                        print("Input start junction after comma")
-                    try:
-                        z = input.split(",")[2]
-                        if z == "ToTrackID":
-                            print("Enter valid inputs")
-                            return
-                        print(z)
-                    except:
-                        print("Input end junction after comma")
-                    if not x:
-                        print("Ooops! FileName value is missing!")
-                        return
-                    if not y:
-                        print("Ooops! From Junction value is missing!")
-                        return
-                    if not z:
-                        print("Ooops! To Junction value is missing!")
-                        return
-                    file = x
-                    start = y
-                    end = z
-                else:
-                    print("Cancelled")
-                    return
-
-                data = Data(file)
-                if data.csvFile == False:
-                    return
-                edges = defaultdict(list)
-                # create the graph
-                for i in range(len(data.df)):  # for each line
-                    rand = random.randint(0, 5)  # generate a random number of trains on the line
-                    trackEdge = TrackEdge(float(data.lengthDf.iloc[i]), float(data.speed.iloc[i]), 1)
-                    railGraph.add_edge(data.fromTrackNIDDf.iloc[i], data.toTrackNIDDf.iloc[i], trackEdge)
-
-                #    The following commented code was used for testing how the addition of cars
-                #    and trains impact the time, and it worked as intended. it randomly populated
-                #    the lines with cars This works when running program in an external python
-                #    console, however, when running on qgis python console it causes qgis to
-                #    freeze because there are too many calculations for this underpowered python
-                #    console. In order to run the commented code below, a stronger computer or
-                #    network of computers is required.
-
-                #        for j in range(rand):                                           # for each train on the line
-                #            randMaxCar = random.randint(0,10)
-                #            randCar = random.randint(0, randMaxCar)
-                #            train = Train(randMaxCar)                            # create a train with a max number of
-                #            cars
-                #            for k in range(randCar):                                    # for each car on the train
-                #                #carEnum = random.randint(1,2)
-                #                carEnum = CarEnumerator.PRODUCECAR
-                #                carSize = random.randint(1, 4)
-                #                if carSize == 1:
-                #                    carSizeEnum = CarSizeEnumerator.SMALL
-                #                elif carSize == 2:
-                #                    carSizeEnum = CarSizeEnumerator.MEDIUM
-                #                elif carSize == 3:
-                #                    carSizeEnum = CarSizeEnumerator.LARGE
-                #                else:
-                #                    carSizeEnum = CarSizeEnumerator.EXTRALARGE
-                #                car = ProduceCar(carEnum, carSizeEnum, 1, 1)        # create the car, assume 1 load and
-                #                1 unload
-                #                car.loadCar(car.numLoadStops)
-                #                car.unLoadCar(car.numUnLoadStops)
-                #
-                #                train.addCar(car)                                       # add to the train
-                #            train.loadTrain()
-                #            trackEdge.addTrain(train)                                   # add the train to the tracks
-
-                # append the line with the trains with the cars onto the graph
-
-                # Need to filter out the graph from/to nodes
-                a = weightedShortestPath(railGraph, start, end)
-                path = a[0]
-                time = a[1]
-                if trackEdge.currentTrains.head.dataval is not None:
-                    stopTime = trackEdge.currentTrains.head.dataval.getStopTime()
-                    print("Total stop time for the trip is: " + stopTime.__str__() + " hours \n")
-                return path
-
-                ##def test():
-                ##    layer = QgsProject.instance().mapLayersByName('JJunctTrack50BFinal')[0]
-                ##    layer2 = QgsProject.instance().mapLayersByName('MBTrackLines')[0]
-                ##    path = pathTest()
-                ##    if not path:
-                ##        print("NO PATH POSSIBLE")
-                ##        return
-                ##    x = []
-                ##    y = []
-
-                # The following commented code is for the directions of the junctions with the
-                # same IDs, however on the map with this code many of the selected nodes are
-                # hidden by overlapping nodes, therefore, even though it is more correct, for
-                # the purposes of viewing on QGIS, The code block was replaced with one that
-                # selects the overlapping junctions which accounts for the different directions.
-                # The highlighted lines have no effect however, it is only the nodes
-
-                #    for i in range(len(path) - 1):
-                #        j = path[i]
-                #        k = path[i+1]
-                #        layer.selectByExpression('\"FTrackNID\" IS\'%s\' AND\"TOTrackNID\" IS\'%s\'' %(j, k))
-                #        for l in layer.selectedFeatureIds():
-                #            x.append(l)
-                #    layer.selectByExpression('\"FTrackNID\" IS\'%s\'' %(path[len(path)-1]))
-                #    for l in layer.selectedFeatureIds():
-                #        x.append(l)
-                #    for i in range(len(path)):
-                #        j = path[i]
-                #        layer2.selectByExpression('\"NID\" IS\'%s\'' %j)
-                #        for l in layer2.selectedFeatureIds():
-                #            y.append(l)
-
-                if not path:
-                    return
-                for i in range(len(path)):
-                    j = path[i]
-                    layer.selectByExpression('\"FTrackNID\" IS\'%s\'' % j)
-                    for l in layer.selectedFeatureIds():
-                        x.append(l)
-                    layer2.selectByExpression('\"NID\" IS\'%s\'' % j)
-                    for l in layer2.selectedFeatureIds():
-                        y.append(l)
-
-                layer.select(x)
-                layer2.select(y)
-
-            pathTest()
+			
+			test()
+            
 
 
 
