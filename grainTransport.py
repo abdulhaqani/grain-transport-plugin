@@ -27,6 +27,7 @@ from collections import defaultdict
 from dbfread import DBF
 import csv
 import sys
+from qgis.core import QgsProject
 import pandas as pd
 from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt5.QtGui import QIcon
@@ -142,7 +143,7 @@ class Train(TrainAbstract):
         i = 0
         print(self.cars.__len__())
         while i < self.cars.__len__():  # check each car
-            if self.cars[i].empty == True:  # if the car is empty
+            if self.cars[i].empty:  # if the car is empty
                 self.cars[i].loadCar(1)  # load the car
             i += 1
             if i == self.cars.__len__():  # every car has been checked to try to add weight
@@ -150,15 +151,15 @@ class Train(TrainAbstract):
 
     def unloadTrain(self):
         i = 0
-        while (i < self.cars.__len__()):  # check each car
-            if (self.cars[i].empty != True):  # if the car is not empty
+        while i < self.cars.__len__():  # check each car
+            if not self.cars[i].empty:  # if the car is not empty
                 self.cars[i].unLoadCar(1)  # unload the car
             i += 1
-            if (i == self.cars.__len__()):  # every car has been checked to try to add weight
+            if i == self.cars.__len__():  # every car has been checked to try to add weight
                 print("Every car is empty \n")
 
     def addCar(self, car):
-        if (self.numCars < self.maxCars):
+        if self.numCars < self.maxCars:
             self.cars.append(car)
             self.numCars += 1
         else:
@@ -178,14 +179,14 @@ class Train(TrainAbstract):
     def getWeight(self):
         weight = self.trainWeight
         i = 0
-        while (i < self.cars.__len__()):
+        while i < self.cars.__len__():
             weight += self.cars[i].GetWeight()
         return weight
 
     def getStopTime(self):
         time = 0
         i = 0
-        while (i < self.cars.__len__()):
+        while i < self.cars.__len__():
             time += self.cars[i].getStopTime()
             i += 1
         return time
@@ -884,8 +885,8 @@ class grainTransport:
         return path
 
     def test(self):
-        layer = QgsProject.instance().mapLayersByName('JJunctTrack50BFinal')[0]
-        layer2 = QgsProject.instance().mapLayersByName('MBTrackLines')[0]
+        layer = QgsProject.instance().mapLayersByName('TrackJunctions')[0]
+        layer2 = QgsProject.instance().mapLayersByName('TrackLines')[0]
         path = self.pathTest()
         if not path:
             print("NO PATH POSSIBLE")
@@ -935,12 +936,12 @@ class grainTransport:
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
         if not self.first_start:
             self.first_start = False
-            self.dlg = grainTransportDialog()
+        dlg = grainTransportDialog()
 
         # show the dialog
-        self.dlg.show()
+        dlg.show()
         # Run the dialog event loop
-        result = self.dlg.exec_()
+        result = dlg.exec_()
         # See if OK was pressed
         if result:
 
