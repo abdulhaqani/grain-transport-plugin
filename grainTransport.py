@@ -683,7 +683,6 @@ class grainTransport:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('grainTransport', message)
 
-
     def add_action(
         self,
         icon_path,
@@ -745,9 +744,9 @@ class grainTransport:
         if whats_this is not None:
             action.setWhatsThis(whats_this)
 
-        if add_to_toolbar:
-            # Adds plugin icon to Plugins toolbar
-            self.iface.addToolBarIcon(action)
+        # if add_to_toolbar:
+        # Adds plugin icon to Plugins toolbar
+        # self.iface.addToolBarIcon(action)
 
         if add_to_menu:
             self.iface.addPluginToMenu(
@@ -768,9 +767,11 @@ class grainTransport:
             callback=self.run,
             parent=self.iface.mainWindow())
 
+        self.iface.addToolBarIcon(QAction(QIcon(":/plugins/grainTransport/icon.png"), "Grain Transport Shortest Path",
+                                          self.iface.mainWindow()))
+
         # will be set False in run()
         self.first_start = True
-
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
