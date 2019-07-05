@@ -17,7 +17,7 @@ email=abdul.haqani@canada.ca
 about=Provides the shortest path between 2 nodes and displays it on a QGIS interface for a grain transport system. The shortest path is with respect to time. Further details are provided on the version control's readme.md
 
 tracker=http://bugs
-repository=http://repo
+repository=https://github.com/abdulhaqani/grain-transport-plugin
 # End of mandatory metadata
 
 # Recommended items:
