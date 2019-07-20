@@ -17,7 +17,7 @@
  Phone Number: 343-549-8559
  ==========================================================================
 """
-#IMPORTS
+# IMPORTS
 import os
 import random
 from abc import ABCMeta, abstractmethod
@@ -166,7 +166,7 @@ class Train(TrainAbstract):
             print("TRAIN IS AT MAX CAPACITY")
 
     def removeCar(self, car):
-        if (self.numCars > 0):
+        if self.numCars > 0:
             self.cars.pop(self.numCars - 1)  # assume car attachment/removal works like a stack
             self.numCars -= 1
         else:
@@ -290,7 +290,7 @@ class TrackEdge(TrackAbstract):
 
     # update and set the time
     def setSpeed(self):
-        # assume each train slows it down by a factor of (capacity / (1 + numtrains))
+        # assume each train slows it down by a factor of (capacity / (1 + num trains))
         if self.numTrains <= self.capacity:
             self.speed = self.speed * (1 / (1 + (self.numTrains / self.capacity)))
 
@@ -412,7 +412,7 @@ class ProduceCar(carAbstract):
 
     # if empty then load
     def loadCar(self, numStations):
-        if (self.empty == True):
+        if self.empty:
             self.totalStopTime += numStations * self.trainStopTime
             self.weight += self.size * 20  # assume load in car weighs twice the car itself
             self.empty = False
@@ -421,7 +421,7 @@ class ProduceCar(carAbstract):
 
     # if full then unload
     def unLoadCar(self, numStations):
-        if (self.empty == False):
+        if not self.empty:
             self.totalStopTime += numStations * self.trainStopTime
             self.weight -= self.size * 20  # assume load in car weighs twice the car itself
             self.empty = True
@@ -530,37 +530,35 @@ class SLinkedList:
 
     # Remove First element
     def removeFirstElement(self):
-        if (self.head is None):
+        if self.head is None:
             return
         self.head = self.head.next
 
     # Remove Last element
     def removeLastElement(self):
-        if (self.head is None):
+        if self.head is None:
             return
         temp = self.head
-        while (temp.next is not None):
+        while temp.next is not None:
             temp = temp.next
         temp.next = None
 
     # Remove node at key
     def removeNode(self, Removekey):
-
         temp = self.head
-
-        if (temp is not None):
-            if (temp.data == Removekey):
+        if temp is not None:
+            if temp.data == Removekey:
                 self.head = temp.next
                 temp = None
                 return
 
-        while (temp is not None):
+        while temp is not None:
             if temp.data == Removekey:
                 break
             prev = temp
             temp = temp.next
 
-        if (temp == None):
+        if temp is None:
             return
 
         prev.next = temp.next
@@ -574,10 +572,10 @@ def weightedShortestPath(railGraph, initial, end):
     shortest_paths = {initial: (None, 0)}
     current_node = initial
     visited = set()
-    if (railGraph.edges[initial] == None):
+    if railGraph.edges[initial] is None:
         print("initial node does not exist")
         return
-    elif (railGraph.edges[end] == None):
+    elif railGraph.edges[end] is None:
         print("end node does not exist")
         return
     while current_node != end:
@@ -588,7 +586,7 @@ def weightedShortestPath(railGraph, initial, end):
         for next_node in destinations:
             temp = railGraph.trackEdges[(current_node, next_node)]
             weight = temp.getTime() + weight_to_current_node
-            # if we havent already visited it
+            # if we haven't already visited it
             if next_node not in shortest_paths:
                 shortest_paths[next_node] = (current_node, weight)
             else:
@@ -622,7 +620,7 @@ def weightedShortestPath(railGraph, initial, end):
         i += 1
     print("Total time for the trip is: " + weight.__str__() + " hours \nThe path to be taken is: ")
     print(path)
-    return ([path, weight])
+    return [path, weight]
 
 
 # ******************************************************************************
@@ -752,7 +750,11 @@ class grainTransport:
             self.iface.addPluginToMenu(
                 self.menu,
                 action)
-
+        if add_to_toolbar:
+            self.iface.addPluginToToolbar(
+                self.menu,
+                self.action
+            )
         self.actions.append(action)
 
         return action
@@ -831,7 +833,7 @@ class grainTransport:
             return
 
         data = Data(file)
-        if data.csvFile == False:
+        if data.csvFile is False:
             return
         edges = defaultdict(list)
         # create the graph
