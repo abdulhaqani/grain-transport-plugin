@@ -926,7 +926,6 @@ class grainTransport:
 
         layer.select(x)
         layer2.select(y)
-        layer.zoomToSelected()
 
     def run(self):
         # Run method that performs all the real work
