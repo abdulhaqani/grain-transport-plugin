@@ -750,11 +750,7 @@ class grainTransport:
             self.iface.addPluginToMenu(
                 self.menu,
                 action)
-        if add_to_toolbar:
-            self.iface.addPluginToToolbar(
-                self.menu,
-                self.action
-            )
+
         self.actions.append(action)
 
         return action
