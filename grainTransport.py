@@ -926,6 +926,7 @@ class grainTransport:
 
         layer.select(x)
         layer2.select(y)
+        self.iface.actionZoomToSelected().trigger()
 
     def run(self):
         # Run method that performs all the real work
