@@ -686,11 +686,11 @@ class grainTransport:
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
         self.action = QAction(
-            QIcon(':/plugins/grainTransport/icon.png'),
+            QIcon(self.plugin_dir + '/icon.png'),
             'Grain Transport', self.iface.mainWindow())
         # connect the action to the run method
         self.action.triggered.connect(self.run)
-
+        
         # Add toolbar button and menu item
         self.iface.addToolBarIcon(self.action)
         self.iface.addPluginToMenu('&Grain Transport', self.action)
