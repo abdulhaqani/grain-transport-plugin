@@ -31,7 +31,7 @@ from qgis.core import QgsProject
 import pandas as pd
 from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QAction, QInputDialog, QLineEdit
+from PyQt5.QtWidgets import QAction, QInputDialog, QLineEdit, QDialog
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -618,8 +618,13 @@ def weightedShortestPath(railGraph, initial, end):
         # getTime takes into account each train, and each car on each train
         weight += temp.getTime()
         i += 1
+    message = QInputDialog()
+    input, ok = QInputDialog.getText(message, "Time", "Total stop time for the trip is: " + weight.__str__() + " hours \n",
+                                QLineEdit.Normal,
+                                '')
     print("Total time for the trip is: " + weight.__str__() + " hours \nThe path to be taken is: ")
     print(path)
+
     return [path, weight]
 
 
@@ -807,6 +812,7 @@ class grainTransport:
         if trackEdge.currentTrains.head.dataval is not None:
             stopTime = trackEdge.currentTrains.head.dataval.getStopTime()
             print("Total stop time for the trip is: " + stopTime.__str__() + " hours \n")
+            
         return path
 
     def test(self):
@@ -862,7 +868,6 @@ class grainTransport:
         if self.first_start:
             self.first_start = False
         dlg = grainTransportDialog()
-
         # show the dialog
         dlg.show()
         # Run the dialog event loop
