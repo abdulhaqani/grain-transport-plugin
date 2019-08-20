@@ -39,11 +39,11 @@ from .resources import *
 from .grainTransport_dialog import grainTransportDialog
 import os.path
 
+
 """
 HELPER FUNCTIONS AND CLASSES
 The following 2 classes are helpers to export and read the data to obtain the desired output
 """
-
 
 def dbf_to_csv(dbf_table_pth):  # Input a dbf, output a csv, same name, same path, except extension
     csv_fn = dbf_table_pth[:-4] + ".csv"  # Set the csv file name
@@ -565,6 +565,8 @@ class SLinkedList:
         temp = None
 
 
+
+
 # shortest path algorithm
 def weightedShortestPath(railGraph, initial, end):
     # shortest paths is a dict of nodes
@@ -624,19 +626,14 @@ def weightedShortestPath(railGraph, initial, end):
                                 '')
     print("Total time for the trip is: " + weight.__str__() + " hours \nThe path to be taken is: ")
     print(path)
-
     return [path, weight]
 
-
 # ******************************************************************************
 # ******************************************************************************
 # ******************************************************************************
-# ******************************************************************************
-
 
 class grainTransport:
     """QGIS Plugin Implementation."""
-
     def __init__(self, iface):
         """Constructor.
 
