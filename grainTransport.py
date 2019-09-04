@@ -22,11 +22,10 @@ import os
 import random
 from abc import ABCMeta, abstractmethod
 from enum import Enum
-import numpy as np
+
 from collections import defaultdict
 from dbfread import DBF
 import csv
-import sys
 from qgis.core import QgsProject
 import pandas as pd
 from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
@@ -35,7 +34,7 @@ from PyQt5.QtWidgets import QAction, QInputDialog, QLineEdit, QDialog
 
 # Initialize Qt resources from file resources.py
 from .resources import *
-# Import the code for the dialog
+
 from .grainTransport_dialog import grainTransportDialog
 import os.path
 
@@ -45,15 +44,16 @@ HELPER FUNCTIONS AND CLASSES
 The following 2 classes are helpers to export and read the data to obtain the desired output
 """
 
+
 def dbf_to_csv(dbf_table_pth):  # Input a dbf, output a csv, same name, same path, except extension
-    csv_fn = dbf_table_pth[:-4] + ".csv"  # Set the csv file name
+    csv_fn = dbf_table_pth[:-4] + ".csv"
     exists = os.path.isfile(dbf_table_pth)
 
     if exists:
-        table = DBF(dbf_table_pth)  # table variable is a DBF object
+        table = DBF(dbf_table_pth)
         with open(csv_fn, 'w', newline='') as f:  # create a csv file, fill it with dbf content
             writer = csv.writer(f)
-            writer.writerow(table.field_names)  # write the column name
+            writer.writerow(table.field_names)
             for record in table:  # write the rows
                 writer.writerow(list(record.values()))
         return csv_fn  # return the csv name
@@ -68,13 +68,13 @@ class Data:
     def __init__(self, file):
         # run method to convert dbf to csv
         exists = os.path.isfile(file)
+
         if not exists:
             self.csvFile = False
             print("File path does not exist")
             return
+
         self.csvFile = dbf_to_csv(file)
-        # read in the dbf
-        # convert it to a df
 
         self.df = pd.read_csv(self.csvFile)
         self.fromTrackNIDDf = self.df.FTRACKNID
@@ -104,7 +104,7 @@ class TrainAbstract(object):
         super().__init__()
         self.time = 0
         self.loadTime = 0  # not using for testing, this is here in case loading/removing are inherently different
-        self.removeTime = 0  # not using for testing, same reason as loadtime
+        self.removeTime = 0  # not using for testing, same reason as load time
         self.cars = []  # empty list to hold the cars
 
     # Modifiers
@@ -136,26 +136,26 @@ class Train(TrainAbstract):
 
     def __init__(self, maxCars):
         super().__init__(self)
-        self.maxCars = maxCars  # maximum number of cars on the train
+        self.maxCars = maxCars
         self.numCars = 0
 
     def loadTrain(self):
         i = 0
         print(self.cars.__len__())
-        while i < self.cars.__len__():  # check each car
-            if self.cars[i].empty:  # if the car is empty
-                self.cars[i].loadCar(1)  # load the car
+        while i < self.cars.__len__():
+            if self.cars[i].empty:
+                self.cars[i].loadCar(1)
             i += 1
-            if i == self.cars.__len__():  # every car has been checked to try to add weight
+            if i == self.cars.__len__():
                 print("Every car is full \n")
 
     def unloadTrain(self):
         i = 0
-        while i < self.cars.__len__():  # check each car
-            if not self.cars[i].empty:  # if the car is not empty
-                self.cars[i].unLoadCar(1)  # unload the car
+        while i < self.cars.__len__():
+            if not self.cars[i].empty:
+                self.cars[i].unLoadCar(1)
             i += 1
-            if i == self.cars.__len__():  # every car has been checked to try to add weight
+            if i == self.cars.__len__():
                 print("Every car is empty \n")
 
     def addCar(self, car):
@@ -167,12 +167,12 @@ class Train(TrainAbstract):
 
     def removeCar(self, car):
         if self.numCars > 0:
-            self.cars.pop(self.numCars - 1)  # assume car attachment/removal works like a stack
+            self.cars.pop(self.numCars - 1)
             self.numCars -= 1
+
         else:
             print("TRAIN IS EMPTY")
 
-    # getters
     def getNumCars(self):
         return self.numCars
 
@@ -211,13 +211,14 @@ class TrackAbstract(object):
     __metaClass__ = ABCMeta
 
     def __init__(self, length, numLines, speed):
-        self.length = length  # constant
-        self.numLines = numLines  # constant
+        self.length = length
+        self.numLines = numLines
+
         self.currentTrains = SLinkedList()
-        self.speed = speed  # constant
+        self.speed = speed
+
         super().__init__()
 
-    # Modifiers
     @abstractmethod
     def addTrain(self, train): pass
 
@@ -227,11 +228,9 @@ class TrackAbstract(object):
     @abstractmethod
     def addNode(self, node): pass
 
-    # setters
     @abstractmethod
     def setTime(self): pass
 
-    # getters
     @abstractmethod
     def getStations(self): pass
 
@@ -255,6 +254,7 @@ class TrackAbstract(object):
 
 
 # the following is the class which contains the details for each rail
+
 class TrackEdge(TrackAbstract):
 
     def __init__(self, speed, length, numLines):
@@ -298,20 +298,21 @@ class TrackEdge(TrackAbstract):
         else:
             self.speed = self.speed * (0.5 / (1 + (self.numTrains / self.capacity)))
 
-    # getters
-    # def getStations(self):
-
     def getHowFull(self):
         self.howFull = self.numTrains / self.capacity
+
         return self.howFull
 
     def getLength(self):
+
         return self.length
 
     def getlineType(self):
+
         return self.trackTypeEnum
 
     def getTime(self):
+
         return self.length / self.speed
 
 
@@ -499,7 +500,7 @@ class SLinkedList:
             print(printval.dataval)
             printval = printval.next
 
-    # Add newnode at beginning
+    # Add new node at beginning
     def addAtBegining(self, newdata):
         NewNode = Node(newdata)
 
@@ -562,12 +563,12 @@ class SLinkedList:
             return
 
         prev.next = temp.next
+
         temp = None
 
 
-
-
 # shortest path algorithm
+
 def weightedShortestPath(railGraph, initial, end):
     # shortest paths is a dict of nodes
     # whose value is a tuple of (previous node, weight)
@@ -616,7 +617,7 @@ def weightedShortestPath(railGraph, initial, end):
     weight = 0
     while i < (path.__len__() - 1):
         temp = railGraph.trackEdges[(path[i], path[i + 1])]
-        # temp points to a trackedge, temp.getTime returns the time for all stops
+        # temp points to a track edge, temp.getTime returns the time for all stops
         # getTime takes into account each train, and each car on each train
         weight += temp.getTime()
         i += 1
@@ -642,6 +643,7 @@ class grainTransport:
             application at run time.
         :type iface: QgsInterface
         """
+
         # Save reference to the QGIS interface
         self.iface = iface
         # initialize plugin directory
@@ -682,7 +684,6 @@ class grainTransport:
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('grainTransport', message)
-
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
@@ -761,8 +762,8 @@ class grainTransport:
             return
         edges = defaultdict(list)
         # create the graph
-        for i in range(len(data.df)):  # for each line
-            rand = random.randint(0, 5)  # generate a random number of trains on the line
+        for i in range(len(data.df)):
+            rand = random.randint(0, 5)
             trackEdge = TrackEdge(float(data.lengthDf.iloc[i]), float(data.speed.iloc[i]), 1)
             railGraph.add_edge(data.fromTrackNIDDf.iloc[i], data.toTrackNIDDf.iloc[i], trackEdge)
 
@@ -859,7 +860,6 @@ class grainTransport:
 
     def run(self):
         # Run method that performs all the real work
-
         # Create the dialog with elements (after translation) and keep reference
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
         if self.first_start:
