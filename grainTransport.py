@@ -32,6 +32,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction, QInputDialog, QLineEdit, QDialog
 
 # Initialize Qt resources from file resources.py
+
 from .resources import *
 
 from .grainTransport_dialog import grainTransportDialog
