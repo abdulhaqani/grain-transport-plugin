@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
  ==========================================================================
- $Id: qgisModule.py,v 1.1 2019/07/05 AHaqani Exp $
+ $Id: qgisModule.py,v 1.1 2019 AHaqani Exp $
  Grain Transport
  ==========================================================================
  (C)opyright:
@@ -13,7 +13,8 @@
    Canada.
 
  Creator: Abdul Haqani
- contact: erik.dorff@canada.ca, alex.foster@canada.ca, alexandre.cyr@canada.ca 
+ Email:   abdul.haqani@canada.ca
+ Phone Number: 343-549-8559
  ==========================================================================
 """
 # IMPORTS
@@ -31,7 +32,7 @@ from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction, QInputDialog, QLineEdit, QDialog
 
-# Initialize Qt resources from file resources.py
+# Initialiser les ressources Qt à partir du dossier ressources.py
 from .resources import *
 
 from .grainTransport_dialog import grainTransportDialog
@@ -39,23 +40,23 @@ import os.path
 
 
 """
-HELPER FUNCTIONS AND CLASSES
-The following 2 classes are helpers to export and read the data to obtain the desired output
+FONCTIONS ET CLASSES DE L’ASSISTANT
+Les deux classes suivantes sont les assistants de l’exportation et de la lecture des données pour obtenir les données de sortie désirées. 
 """
 
 
-def dbf_to_csv(dbf_table_pth):  # Input a dbf, output a csv, same name, same path, except extension
+def dbf_to_csv(dbf_table_pth):  # Entrer un fnl, produire un csv, même nom, même chemin d’accès, sauf extension
     csv_fn = dbf_table_pth[:-4] + ".csv"
     exists = os.path.isfile(dbf_table_pth)
 
     if exists:
         table = DBF(dbf_table_pth)
-        with open(csv_fn, 'w', newline='') as f:  # create a csv file, fill it with dbf content
+        with open(csv_fn, 'w', newline='') as f:  # créer un fichier csv, le remplir avec un contenu fnl
             writer = csv.writer(f)
             writer.writerow(table.field_names)
             for record in table:  # write the rows
                 writer.writerow(list(record.values()))
-        return csv_fn  # return the csv name
+        return csv_fn  # renvoyer le nom csv
 
     else:
         print("File does not exist")
@@ -63,9 +64,9 @@ def dbf_to_csv(dbf_table_pth):  # Input a dbf, output a csv, same name, same pat
 
 
 class Data:
-    # create an object which has all the data (going to remove all the subdivisions later, just put them for ease)
+    # créer un objet qui contient toutes les données (nous retirerons toutes les subdivisions plus tard; on les a tout simplement mises par souci de commodité)
     def __init__(self, file):
-        # run method to convert dbf to csv
+        # exécuter la méthode pour convertir fnl en csv
         exists = os.path.isfile(file)
 
         if not exists:
@@ -88,9 +89,9 @@ class Data:
 # ******************************************************************************
 
 """
-TRAIN CLASSES
-The following classes include an abstract class for train objects, and an implementation
-of a train class
+CLASSES DE TRAIN
+Les classes suivantes incluent une classe abstraite pour les objets de train et une implémentation
+d'une classe de train
 """
 
 
@@ -98,16 +99,16 @@ class TrainAbstract(object):
     __metaClass__ = ABCMeta
 
     def __init__(self, carType):
-        self.type = carType  # enum to see whether this is a passenger or freight train
-        self.trainWeight = 10  # assume train weighs 10 tonnes
+        self.type = carType  # enum pour vérifier s’il s’agit d’un train de voyageur ou de marchandise
+        self.trainWeight = 10  # on suppose que le train pèse 10 tonnes
         super().__init__()
         self.time = 0
-        self.loadTime = 0  # not using for testing, this is here in case loading/removing are inherently different
-        self.removeTime = 0  # not using for testing, same reason as load time
-        self.cars = []  # empty list to hold the cars
+        self.loadTime = 0  # on ne l’utilise pas pour l’essai, elle est présente au cas où le chargement et le déchargement seraient fondamentalement différents
+        self.removeTime = 0  # on ne l’utilise pas pour l’essai pour la même raison que le temps de chargement
+        self.cars = []  # liste vide pour contenir les wagons
 
-    # Modifiers
-    # currently using weight (tons)
+    # Modificateurs
+	# on utilise actuellement le poids (tonnes)
     @abstractmethod
     def loadTrain(self): pass
 
@@ -197,15 +198,15 @@ class Train(TrainAbstract):
 # ******************************************************************************
 
 """
-TRACK CLASSES
-The following includes the abstract class and an implementation for a track type
-Please note that since no data was provided while implementing this, that the 
-speed relationship was entirely assumed. A more accurate relationship can be 
-obtained if a dataset is provided, and a neural network is trained off of that.
+CLASSES DE VOIES
+Voici la classe abstraite et une mise en œuvre pour un type de voie. 
+Veuillez noter que puisqu’aucune donnée n’a été fournie pendant cette mise en œuvre,  
+la relation relative à la vitesse a entièrement été supposée. Il est possible d’obtenir une relation plus exacte  
+si un ensemble de données est fourni, et qu’un réseau neuronal est créé à partir de l’ensemble. 
 """
 
 
-# the following abstract class is for the TrainEdge class
+# la classe abstraite suivante concerne la classe TrainEdge
 class TrackAbstract(object):
     __metaClass__ = ABCMeta
 
@@ -252,34 +253,34 @@ class TrackAbstract(object):
     def getTime(self): pass
 
 
-# the following is the class which contains the details for each rail
+# ce qui suit est la classe qui contient les détails de chaque voie ferrée
 
 class TrackEdge(TrackAbstract):
 
     def __init__(self, speed, length, numLines):
         super().__init__(speed, length, numLines)
-        # for now we are using length is the number of length units that required to increase capacity by 1
-        # for example, if 5km is the unit required to increase capacity by 1, a track of length 100km has capacity 20
+        # pour l’instant, nous utilisons la longueur, qui est le nombre d’unités de longueur requis pour accroître la capacité de 1
+        # par exemple, si 5 km est l’unité requise pour accroître la capacité de 1, une voie d’une longueur de 100 km a une capacité de 20
         self.capacity = length * numLines  # constant
         self.numTrains = 0
 
-        # currently it is assumed that all trains are equally spaced
+        # actuellement, on présume que tous les trains sont espacés de façon égale
         self.howFull = self.numTrains / self.capacity
 
-        """ASSUMED RELATIONSHIP FOR SPEED"""
+        """RELATION SUPOSEÉ POUR LA VITESSE"""
         self.speed = self.speed * (1 / (1 + (self.numTrains / self.capacity)))
-        # for the purpose of this project, assume the time to travel=(length*(capacity/1+numTrains))/topSpeed where
-        # time is going to be the weight for the shortest path algorithm implementation
+        # pour les besoins du présent projet, on présume que le temps qu’il faut pour voyager = (longueur*(capacité/1+nombreTrains))/vitesseMaximale où 
+        # le temps sera le poids pour la mise en œuvre de l’algorithme de chemin d’accès le plus court
         self.time = 0
 
-    # add a train on the line
+    # ajouter un train sur la ligne
     def addTrain(self, train):
         self.currentTrains.addAtBegining(train)
         self.numTrains += 1
         self.howFull = self.numTrains / self.capacity
         self.setSpeed()
 
-    # remove a train
+    # retirer un train
     def removeTrain(self, train):
         self.currentTrains.removeLastElement(train)
         self.numTrains -= 1
@@ -287,13 +288,13 @@ class TrackEdge(TrackAbstract):
         self.setTime()
         print("removed train from track")
 
-    # update and set the time
+    # actualiser et établir le temps
     def setSpeed(self):
-        # assume each train slows it down by a factor of (capacity / (1 + num trains))
+        # on suppose que chaque train le ralentit par un facteur de (capacité/91+nombre de trains)
         if self.numTrains <= self.capacity:
             self.speed = self.speed * (1 / (1 + (self.numTrains / self.capacity)))
 
-        # assume that if the number of trains exceeds the capacity then it is twice as slow
+        # on suppose que si le nombre de trains dépasse la capacité, le temps est deux fois plus lent
         else:
             self.speed = self.speed * (0.5 / (1 + (self.numTrains / self.capacity)))
 
@@ -321,22 +322,22 @@ class TrackEdge(TrackAbstract):
 # ******************************************************************************
 
 """
-CAR CLASSES
-The following is 3 classes, one is an abstract class for Car classes, the other 2
-are implementations for passenger and produce car classes. Another one which may 
-be desired is a produceAndPassenger car, but for the purposes of this test, it was
-not required. Since no information was given on the impact of cars, Enumerators 
-were used to classify the impact that different cars can have. 
+CLASSES DE WAGONS
+Voici 3 classes; l’une est une classe abstraite pour les classes Wagon, les deux autres 
+sont des mises en œuvre pour les classes voyageurs et wagon de marchandise. Une autre qu’on voudra peut-être est  
+un wagon marchandisesEtVoyageurs, mais pour les besoins du présent essai, elle 
+n’est pas requise. Puisqu’aucune information n’a été donnée sur les incidences des wagons, des agents recenseurs 
+ont été utilisés pour classer l’incidence que différents wagons peuvent avoir. 
 """
 
 
-# currently assuming that only 2 types of Car types exist
+# on présume actuellement que seuls 2 types de wagons existent
 class CarEnumerator(Enum):
     PASSENGERCAR = 1
     PRODUCECAR = 2
 
 
-# Currently assuming only these car sizes exist
+# On présume actuellement que seules ces tailles de wagon existent
 class CarSizeEnumerator(Enum):
     SMALL = 1
     MEDIUM = 2
@@ -344,7 +345,7 @@ class CarSizeEnumerator(Enum):
     EXTRALARGE = 4
 
 
-# Car parent class
+# Classe de wagons principale
 class carAbstract(object):
     __metaClass__ = ABCMeta
 
@@ -367,23 +368,23 @@ class carAbstract(object):
     def getStopTime(self): pass
 
 
-# Passenger Car class implementation
+# Mise en œuvre de la classe de wagon de voyageurs
 class PassengerCar(carAbstract):
     def __init__(self, carEnum, carSizeEnum):
         carAbstract.__init__(self, carEnum, carSizeEnum, self.numLoadStops)
-        # assume that a small car weighs 10 tonnes, also neglect passenger weight
+        # on suppose qu’un petit wagon pèse 10 tonnes. On ne tient pas compte du poids des voyageurs
         self.weight = carSizeEnum.value * 10
-        # assume that a small car takes 15 minutes to load passengers
+        # on suppose qu’il faut 15 minutes pour monter des voyageurs dans un petit wagon
         self.trainStopTime = carSizeEnum.value * 0.25
         self.totalStopTime = 0
         self.numLoadStops = self.numLoadStops
 
-    # assume each stop time depends only on the numStations
-    # note, since it's a passenger car, weight change is negligible
+    # on suppose que chaque temps d’arrêt ne dépend que du nomStations
+    # remarque, puisqu’il s’agit d’un wagon de voyageurs, la variation de poids est négligeable
     def loadCar(self):
         self.totalStopTime += self.numLoadStops * self.trainStopTime
 
-    # Stop time for this specific car
+    # Temps d’arrêt pour ce wagon en particulier
     def getStopTime(self):
         return self.totalStopTime
 
@@ -391,39 +392,39 @@ class PassengerCar(carAbstract):
         return self.weight
 
 
-# Produce Car implementation
+# Mise en œuvre d’un wagon de marchandises
 class ProduceCar(carAbstract):
     def __init__(self, carEnum, carSizeEnum, numLoadStops, numUnLoadStops):
         carAbstract.__init__(self, carEnum, carSizeEnum, numLoadStops)
-        # assume that a small car weighs 10 tons (empty)
+        # on suppose qu’un petit wagon pèse 10 tonnes (vide)
         self.weight = self.size * 10
-        # assume that a small car takes 10 minutes to load/unload 10 tonne car
-        # also assume that small car capacity = 10 tonnes, medium = 20 tonnes, large = 30 tonnes, extra large = 40 tonne
+        # on suppose qu’il faut 10 minutes pour charger ou décharger un wagon de 10 tonnes
+        # on suppose aussi que la capacité d’un petit wagon = 10 tonnes, moyen wagon = 20 tonnes, grand wagon = 30 tonnes, très grand wagon = 40 tonnes
         self.trainStopTime = self.size * 0.5  # const
-        # assume only 1 load and 1 unload per car
+        # on suppose qu’il n’y a qu’un chargement et qu’un déchargement par wagon
         self.numLoadStops = numLoadStops
         self.numUnLoadStops = numUnLoadStops
         self.totalStopTime = 0
         self.empty = True
 
-    # assume each stop time depends only on the numStations
-    # also currently assume load and unload car takes same amount of time
-    # finally, currently assuming cars can either be full or empty
+    # on suppose que chaque temps d’arrêt ne dépend que du nomStations
+    # on suppose qu’actuellement, le chargement et le déchargement d’un wagon prennent le même temps
+    # enfin, on suppose qu’actuellement, les wagons peuvent être soit pleins ou vides
 
-    # if empty then load
+    # si vide, charger
     def loadCar(self, numStations):
         if self.empty:
             self.totalStopTime += numStations * self.trainStopTime
-            self.weight += self.size * 20  # assume load in car weighs twice the car itself
+            self.weight += self.size * 20  # on suppose que le chargement du wagon pèse deux fois plus que le wagon lui-même
             self.empty = False
         else:
             return
 
-    # if full then unload
+    # si plein, décharger
     def unLoadCar(self, numStations):
         if not self.empty:
             self.totalStopTime += numStations * self.trainStopTime
-            self.weight -= self.size * 20  # assume load in car weighs twice the car itself
+            self.weight -= self.size * 20  # on suppose que le chargement du wagon pèse deux fois plus que le wagon lui-même
             self.empty = True
         else:
             return
@@ -441,43 +442,43 @@ class ProduceCar(carAbstract):
 # ******************************************************************************
 
 """
-DATA STRUCTURES AND SHORTEST PATH ALGORITHM
-The following 2 classes are the data structures used to map the data
-Graph and node create the map
-The function 'weightedShortestPath(railGraph, initial, end)' has the implementation 
-for the shortest path algorithm. It takes into account many different variables
-that are parameterized in the container classes. The train, car, and tracks 
-classes have the implementation for the weights (time), this algorithm simply 
-calls those class' methods to obtain the weights. Any adjustment for how the 
-variables impact the time should be done to those class' 'getTime()' methods
+STRUCTURES DES DONNÉES ET ALGORITHME DU CHEMIN D’ACCÈS LE PLUS COURT
+Les deux classes suivantes sont les structures de données utilisées pour cartographier les données
+Le graphique et le nœud créent la carte
+La fonction 'weightedShortestPath(railGraph, initial, end)'  est mise en œuvre 
+pour l’algorithme du chemin d’accès le plus court. Elle tient compte de nombreuses variables différentes
+qui sont paramétrées dans les classes associées au conteneur. Les classes train, wagon et voies 
+sont mises en œuvre pour les poids (temps). Cet algorithme  
+appelle simplement les méthodes de ces classes pour obtenir les poids. Toute modification de la façon
+dont les variables influencent le temps doit être apportée aux méthodes 'getTime()' de ces classes.
 """
 
 
-# graph for the rail system
+# graphique pour le système ferroviaire
 class Graph():
     def __init__(self):
         """
-        self.edges is a dict of all possible next nodes
-        e.g. {'X': ['A', 'B', 'C', 'E'], ...}
-        self.weights has all the weights between two nodes,
-        with the two nodes as a tuple as the key
-        e.g. {('X', 'A'): 7, ('X', 'B'): 2, ...}
-        """
+    self.edges est un dict de tous les prochains nœuds possibles.
+    p. ex. {'X': ['A', 'B', 'C', 'E'], ...}
+    self.weights comprend tous les poids entre deux nœuds, 
+    où les deux nœuds comme tuple sont la clé. 
+    p. ex. {('X', 'A'): 7, ('X', 'B'): 2, ...}
+    """
         self.edges = defaultdict(list)
         self.trackEdges = {}
 
-    # This constructs the map skeleton, no trains or cars are added
+    # Cet élément construit le squelette de la carte; aucun train ni wagon n’est ajouté
     def add_edge(self, from_node, to_node, trackEdge):
-        # Note: assumes edges are bi-directional
+        # Remarque : on suppose que les bordures sont bidirectionnelles.
         self.edges[from_node].append(to_node)
         self.edges[to_node].append(from_node)
-        # Use trackEdge to allow the graph weights to be mutable via TrackEdge class
+        # Utiliser trackEdge pour permettre le déplacement des poids du graphique par l’entremise de la classe TrackEdge
 
         self.trackEdges[(from_node, to_node)] = trackEdge
         self.trackEdges[(to_node, from_node)] = trackEdge
 
 
-# node class for train intersections (and possibly pick ups)
+# classe nœud pour les intersections de train (et possiblement la collecte)
 class Node:
     def __init__(self, dataval):
         self.dataval = dataval
@@ -487,27 +488,27 @@ class Node:
         return self.dataval
 
 
-# Singly linked list
+# Liste liée de façon simple
 class SLinkedList:
     def __init__(self):
         self.head = Node(None)
 
-    # Print the linked list
+    # Reproduire la liste liée
     def printLList(self):
         printval = self.head.dataval
         while printval is not None:
             print(printval.dataval)
             printval = printval.next
 
-    # Add new node at beginning
+    # Ajouter un nouveau nœud au début
     def addAtBegining(self, newdata):
         NewNode = Node(newdata)
 
-        # Update the new nodes next val to existing node
+        # Actualiser la prochaine valeur des nouveaux nœuds au nœud existant
         NewNode.next = self.head
         self.head = NewNode
 
-    # Add New node at end
+    # Ajouter un nouveau nœud à la fin
     def addAtEnd(self, newdata):
         NewNode = Node(newdata)
         if self.head is None:
@@ -518,7 +519,7 @@ class SLinkedList:
             last = last.next
         last.next = NewNode
 
-    # Add node in between nodes (note probably won't need)
+    # Ajouter un nœud entre des nœuds (remarque : ne sera probablement pas requis)
     def addInbetween(self, middle_node, newdata):
         if middle_node is None:
             print("The mentioned node is absent")
@@ -528,13 +529,13 @@ class SLinkedList:
         NewNode.next = middle_node.next
         middle_node.next = NewNode
 
-    # Remove First element
+    # Supprimer le premier élément
     def removeFirstElement(self):
         if self.head is None:
             return
         self.head = self.head.next
 
-    # Remove Last element
+    # Supprimer le dernier élément
     def removeLastElement(self):
         if self.head is None:
             return
@@ -543,7 +544,7 @@ class SLinkedList:
             temp = temp.next
         temp.next = None
 
-    # Remove node at key
+    # Supprimer un nœud à un endroit clé
     def removeNode(self, Removekey):
         temp = self.head
         if temp is not None:
@@ -566,11 +567,11 @@ class SLinkedList:
         temp = None
 
 
-# shortest path algorithm
+# algorithme du chemin d’accès le plus court
 
 def weightedShortestPath(railGraph, initial, end):
-    # shortest paths is a dict of nodes
-    # whose value is a tuple of (previous node, weight)
+    # les chemins d’accès les plus courts sont un dict de nœuds
+    # dont la valeur est un tuple de (nœud, poids précédent)
     shortest_paths = {initial: (None, 0)}
     current_node = initial
     visited = set()
@@ -588,36 +589,36 @@ def weightedShortestPath(railGraph, initial, end):
         for next_node in destinations:
             temp = railGraph.trackEdges[(current_node, next_node)]
             weight = temp.getTime() + weight_to_current_node
-            # if we haven't already visited it
+            # si nous ne l’avons pas déjà examiné
             if next_node not in shortest_paths:
                 shortest_paths[next_node] = (current_node, weight)
             else:
-                # set current and check if it's shorter than the old shortest path
+                # établir la valeur actuelle et vérifier si elle est plus courte que l’ancien chemin d’accès le plus court
                 current_shortest_weight = shortest_paths[next_node][1]
                 if current_shortest_weight > weight:
-                    # set next node to the current node
+                    # établir le prochain nœud à côté du nœud actuel
                     shortest_paths[next_node] = (current_node, weight)
 
         next_destinations = {node: shortest_paths[node] for node in shortest_paths if node not in visited}
         if not next_destinations:
             return "Route Not Possible"
-        # next node is the destination with the lowest weight
+        # le prochain nœud est la destination dont le poids est le plus faible
         current_node = min(next_destinations, key=lambda k: next_destinations[k][1])
 
-    # Work back through destinations in shortest path
+    # Revenir aux destinations par le chemin le plus court
     path = []
     while current_node is not None:
         path.append(current_node)
         next_node = shortest_paths[current_node][0]
         current_node = next_node
-    # Reverse path
+    # Chemin inverse
     path = path[::-1]
     i = 0
     weight = 0
     while i < (path.__len__() - 1):
         temp = railGraph.trackEdges[(path[i], path[i + 1])]
-        # temp points to a track edge, temp.getTime returns the time for all stops
-        # getTime takes into account each train, and each car on each train
+        # temp indique une limite de voie, temp.getTime renvoie le temps pour chaque arrêt
+        # getTemp tient compte de chaque train, et de chaque wagon de chaque train
         weight += temp.getTime()
         i += 1
     message = QInputDialog()
@@ -710,9 +711,9 @@ class grainTransport:
     def pathTest(self):
         qid = QInputDialog()
 
-        """running everything """
+        “””tout exécuter”””
         railGraph = Graph()
-        input, ok = QInputDialog.getText(qid, "Enter inputs", "Enter inputs as 'fileName,start,end'",
+        input, ok = QInputDialog.getText(qid, "Entrer les entrées", "Entrer les entrées comme 'nomDeFichier,début,fin'",
                                          QLineEdit.Normal,
                                          "FILEPATH" + "," + "FromTrackID" + "," + "ToTrackId")
         x = ""
@@ -760,19 +761,19 @@ class grainTransport:
         if data.csvFile is False:
             return
         edges = defaultdict(list)
-        # create the graph
+        # créer le graphique
         for i in range(len(data.df)):
             rand = random.randint(0, 5)
             trackEdge = TrackEdge(float(data.lengthDf.iloc[i]), float(data.speed.iloc[i]), 1)
             railGraph.add_edge(data.fromTrackNIDDf.iloc[i], data.toTrackNIDDf.iloc[i], trackEdge)
 
-        #    The following commented code was used for testing how the addition of cars
-        #    and trains impact the time, and it worked as intended. it randomly populated
-        #    the lines with cars This works when running program in an external python
-        #    console, however, when running on qgis python console it causes qgis to
-        #    freeze because there are too many calculations for this underpowered python
-        #    console. In order to run the commented code below, a stronger computer or
-        #    network of computers is required.
+        # Le code de commentaire suivant a été utilisé pour essayer la façon dont l’ajout de wagons 
+        # et de trains influence le temps, et le code a fonctionné comme voulu. Il a rempli les lignes des wagons 
+        # de façon aléatoire. Ce code fonctionne lorsqu’on exécute le programme dans une console python externe.
+        # Toutefois, lorsqu’on l’exécute dans une console python qgis, qgis 
+        # fige parce que le nombre de calculs est trop élevé pour cette console python trop faible 
+        # Afin d’exécuter le code commenté ci-dessous, il faut un ordinateur ou 
+        # un réseau d’ordinateurs puissant. 
 
         #        for j in range(rand):                                           # for each train on the line
         #            randMaxCar = random.randint(0,10)
@@ -800,9 +801,9 @@ class grainTransport:
         #            train.loadTrain()
         #            trackEdge.addTrain(train)                                   # add the train to the tracks
 
-        # append the line with the trains with the cars onto the graph
+        # ajouter la ligne sur laquelle se trouvent les trains et leurs wagons sur le graphique 
 
-        # Need to filter out the graph from/to nodes
+        # Il faut filtrer les nœuds du graphique
         a = weightedShortestPath(railGraph, start, end)
         path = a[0]
         time = a[1]
@@ -821,12 +822,12 @@ class grainTransport:
             return
         x = []
         y = []
-        # The following commented code is for the directions of the junctions with the
-        # same IDs, however on the map with this code many of the selected nodes are
-        # hidden by overlapping nodes, therefore, even though it is more correct, for
-        # the purposes of viewing on QGIS, The code block was replaced with one that
-        # selects the overlapping junctions which accounts for the different directions.
-        # The highlighted lines have no effect however, it is only the nodes
+        # Le code de commande suivant concerne les directions des jonctions avec les 
+        # mêmes ID. Toutefois, sur la carte dotée de ce code, bon nombre des nœuds sélectionnés sont 
+        # cachés par des nœuds superposés. Par conséquent, même si c’est plus juste aux 
+        # fins de la visualisation au moyen de QGIS, le bloc de code a été remplacé par un bloc qui 
+        # sélectionne les jonctions superposées qui tiennent compte des différentes directions.
+        # Les lignes en surbrillance n’ont aucun effet. Toutefois, ce ne sont que les nœuds
 
         #    for i in range(len(path) - 1):
         #        j = path[i]
@@ -858,17 +859,17 @@ class grainTransport:
         self.iface.actionZoomToSelected().trigger()
 
     def run(self):
-        # Run method that performs all the real work
-        # Create the dialog with elements (after translation) and keep reference
-        # Only create GUI ONCE in callback, so that it will only load when the plugin is started
+        # exécuter la méthode qui réalise tout le réel travail
+        # créer le dialogue avec des éléments (après la traduction) et conserver les références
+        # Ne créer le GUI qu’une fois en rappel afin qu’il ne charge que lorsque le module est lancé. 
         if self.first_start:
             self.first_start = False
         dlg = grainTransportDialog()
-        # show the dialog
+        # montrer le dialogue
         dlg.show()
-        # Run the dialog event loop
+        # Exécuter la boucle de l’événement du dialogue
         result = dlg.exec_()
-        # See if OK was pressed
+        # Vérifier si on a appuyé sur OK
         if result:
             self.test()
             

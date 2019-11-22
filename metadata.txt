@@ -12,7 +12,7 @@ qgisMinimumVersion=3.0
 description=Provides the shortest path in a grain transport system
 version=0.1
 author=Abdul Haqani/Statistics Canada
-email=abdul.haqani@canada.ca
+email=abdul.haqani@canada.ca erik.dorff@canada.ca alex.foster@canada.ca alexandre.cyr@canada.ca
 
 about=Provides the shortest path between 2 nodes and displays it on a QGIS interface for a grain transport system. The shortest path is with respect to time. Further details are provided on the version control's readme.md
 
